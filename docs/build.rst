@@ -34,7 +34,7 @@ Run-time dependencies:
 * ``zlib``
 * ``libpng``
 * ``liblcms2``
-* ``librsync``
+* ``libxxhash``
 * ``openssl``
 * ``freetype`` (not needed on macOS)
 * ``fontconfig`` (not needed on macOS)
@@ -63,7 +63,7 @@ Build-time dependencies:
   - ``liblcms2-dev``
   - ``libssl-dev``
   - ``libpython3-dev``
-  - ``librsync-dev``
+  - ``libxxhash-dev``
 
 
 Install and run from source

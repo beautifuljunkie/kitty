@@ -299,24 +299,6 @@ def set_arches(flags: List[str], arches: Iterable[str] = ('x86_64', 'arm64')) ->
         flags.extend(('-arch', arch))
 
 
-def detect_librsync(cc: List[str], cflags: List[str], ldflags: List[str]) -> str:
-    if not test_compile(
-            cc, *cflags, libraries=('rsync',), ldflags=ldflags, show_stderr=True,
-            src='#include <librsync.h>\nint main(void) { rs_strerror(0); return 0; }'):
-        raise SystemExit('The librsync library is required')
-    # check for rs_sig_args() which was added to librsync in Apr 2020 version 2.3.0
-    if test_compile(cc, *cflags, libraries=('rsync',), ldflags=ldflags, src='''
-#include <librsync.h>
-int main(void) {
-    rs_magic_number magic_number = 0;
-    size_t block_len = 0, strong_len = 0;
-    rs_sig_args(1024, &magic_number, &block_len, &strong_len);
-    return 0;
-}'''):
-        return '-DKITTY_HAS_RS_SIG_ARGS'
-    return ''
-
-
 def is_gcc(cc: Iterable[str]) -> bool:
 
     @lru_cache()
@@ -429,10 +411,6 @@ def init_env(
     ldpaths = []
     for path in extra_library_dirs:
         ldpaths.append(f'-L{path}')
-
-    rs_cflag = detect_librsync(cc, cflags, ldflags + ldpaths)
-    if rs_cflag:
-        cflags.append(rs_cflag)
 
     if build_universal_binary:
         set_arches(cflags)
@@ -825,7 +803,7 @@ def compile_kittens(args: Options) -> None:
         return kitten, sources, headers, f'kittens/{kitten}/{output}', includes, libraries
 
     for kitten, sources, all_headers, dest, includes, libraries in (
-        files('transfer', 'rsync', libraries=('rsync',)),
+        files('transfer', 'rsync', libraries=('xxhash',)),
     ):
         final_env = kenv.copy()
         final_env.cflags.extend(f'-I{x}' for x in includes)
